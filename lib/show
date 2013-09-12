@@ -2,6 +2,7 @@
 #desc:[show installed OpenPNE]
 show(){ #{{{
   getBranch(){ cd $1 && if [ -e ./.git ];then git branch | grep '\*' | sed -e 's/\* //g' && return 0;else return 1;fi }
+  getVersion(){ tail ${dir}'/data/version.php' | grep OPENPNE_VERSION | grep -Eo '3\.[0-9]'; }
   local branch=
   if [ $target_dir ];then
     local baseUrl=$(getBaseUrl ${dir})
@@ -14,12 +15,21 @@ show(){ #{{{
     printf "${green}dbname${color_off}:   $dbname\n"
   else
     printf "${yellow}installed OpenPNE${color_off}\n"
+    local -a installed_openpne=()
     for i in $(ls $installdir)
     do
+      if [ $(ls ${installdir}/$i | grep -E ^symfony$) ];then
+        installed_openpne=(${installed_openpne[@]} $i)
+      fi
+    done
+    for i in ${installed_openpne[@]}
+    do
       dir=$(isDir $i)
+      version=$(getVersion ${dir})
       branch=$(getBranch ${dir})
       if [ -n $branch ];then
         printf "  ${green}$i${color_off}:\n"
+        echo '    version: '$version
         echo '    branch: '$branch
       else continue;
       fi
