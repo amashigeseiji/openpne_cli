@@ -27,18 +27,17 @@ source ${libdir}/common
 readConf(){ cat ${conf_file} | sed '/^$/d' | grep -vE '^#'; }
 #}}}
 getCommand(){ #{{{
-  local cmds=(`/bin/ls ${libdir} | grep -v common`)
-
+  local message='command not found.'
   if [ $# -gt 0 ];then
-    for cmd in ${cmds[@]}
+    for cmd in $( getCommands )
     do
       if [ $cmd = $1 ];then
         echo $cmd;return 0;
       fi
     done
 
-    echo 'argument invalid.';return 1
-  else echo 'argument required.';return 2
+    echo $message;return 1
+  else echo $message;return 2
   fi
 } #}}}
 isDir(){ #{{{
