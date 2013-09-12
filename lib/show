@@ -7,19 +7,19 @@ show(){ #{{{
     local baseUrl=$(getBaseUrl ${dir})
     local dbname=$(getDatabaseName ${dir})
     branch=$(getBranch ${dir})
-    echo 'name: '$target_dir
-    echo 'branch: '$branch
-    echo 'path: '$dir
-    echo 'base_url: '$baseUrl
-    echo 'dbname: '$dbname
+    printf "${green}name${color_off}:     $target_dir\n"
+    printf "${green}branch${color_off}:   $branch\n"
+    printf "${green}path${color_off}:     $dir\n"
+    printf "${green}base_url${color_off}: $baseUrl\n"
+    printf "${green}dbname${color_off}:   $dbname\n"
   else
-    echo 'installed OpenPNE:'
+    printf "${yellow}installed OpenPNE${color_off}\n"
     for i in $(ls $installdir)
     do
       dir=$(isDir $i)
       branch=$(getBranch ${dir})
       if [ -n $branch ];then
-        echo '  '$i':'
+        printf "  ${green}$i${color_off}:\n"
         echo '    branch: '$branch
       else continue;
       fi
