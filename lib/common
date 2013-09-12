@@ -1,0 +1,12 @@
+#!/bin/sh
+getDatabaseName(){
+  local dir=$1
+  cat ${dir}'/config/databases.yml' | grep dsn | grep -oE 'dbname=.*(;|\r\n|\n|\r)' | awk -F'=' '{print $2}' | sed -e 's/;//g';
+}
+getBaseUrl(){
+  local dir=$1
+  cat ${dir}'/config/OpenPNE.yml' | grep -E '^(base_url)' | awk -F' ' '{print $2}' | sed -e  's/\"//g' | sed -e 's/http:\/\///g';
+}
+isOpenPNEDir(){
+  if [ `ls | grep -E '^(symfony)$'` ];then :;else echo 'this directory is not OpenPNE directory.';exit;fi
+}

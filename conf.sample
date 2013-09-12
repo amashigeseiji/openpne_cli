@@ -1,0 +1,19 @@
+# OpenPNEをインストールする親ディレクトリを上書き
+#installdir $HOME'/.openpne/installed'
+# 公開ディレクトリ
+publicdir '/var/www/sns'
+# repository ローカルディレクトリを指定
+repository $HOME'/.openpne/repository/OpenPNE3.git'
+# server domain設定
+server_domain '.local'
+# url のprefix
+prefix 'op'
+# db設定
+dbms 'mysql'
+dbuser 'root'
+dbpassword ''
+dbhost 'localhost'
+dbsock ''
+# インストールと同時にプラグインをダウンロードする場合はコメントアウトを解除
+#_plugin balibali/opDiaryPlugin
+#_plugin openpne-ospt/opAlbumPlugin

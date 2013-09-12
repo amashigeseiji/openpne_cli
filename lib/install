@@ -1,0 +1,156 @@
+#!/bin/sh
+#desc:[install OpenPNE]
+cloneOpenpne(){ #{{{
+  # repositoryをローカルのディレクトリに指定している場合
+  if [[ ! ${repository} =~ ^http ]];then
+    if [ -d ${repository} ];then
+      # repositoryを更新
+      printf 'Updating repository...';
+      cd ${repository} && git fetch --all > /dev/null;echoError
+    else
+      # なければrepositoryを作成
+      echo 'Creating repository...';
+      mkdir -p ${repository};
+      git clone --mirror https://github.com/openpne/OpenPNE3.git ${repository} > /dev/null
+      echoError
+    fi
+  fi
+  printf "Cloning into '${dir}'..."
+  git clone ${repository} ${dir} > /dev/null;echoError;
+
+  # branchが指定されたら切り替える
+  if [ $option ];then
+    echo 'Checkout branch.'
+    if [ $option = 'branch' ];then
+      cd $dir && git checkout -b $branch 'origin/'$branch;echoError
+    elif [ $option = 'tag' ];then
+      cd $dir && git checkout -b $branch $branch;echoError
+    fi
+  fi
+} # }}}
+clonePlugin(){ #{{{
+  for i in ${plugins[@]}
+  do
+    local repository=''
+    local plugin_ver=$( readConf | grep -E '^_plugin' | grep $i | awk -F' ' '{print $3}' )
+    local plugin_name=$( readConf | grep -E '^_plugin' | grep $i | awk '{print $2}' | awk -F'[/:]' '{print $NF}' | sed -e 's/.git//g' )
+    echo 'install plugin: '$plugin_name
+    echo 'plugin_version: '$plugin_ver
+
+    if [[ $i =~ ^(http|git) ]];then repository=$i;
+    else
+      if [ -e $i -a -d $i ];then repository=$i;
+      else repository='https://github.com/'$i'.git';
+      fi
+    fi
+    cd ${dir}'/plugins' && git clone ${repository}
+
+    if [ ! -z $plugin_ver ];then
+      cd ${dir}'/plugins/'${plugin_name} && git checkout -b $plugin_ver 'origin/'$plugin_ver
+    fi
+  done
+} #}}}
+createDatabasesYML(){ #{{{
+  local dbname=$1
+  local version=$2
+  local dsn="${dbms}:dbname=${dbname};host=${dbhost}"
+  local databasesYML=${dir}'/config/databases.yml'
+  if [ $version -gt 33 -o $version -eq 30 ];then
+    cd ${dir} && php symfony configure:database "${dsn}" ${dbuser} ${dbpassword}
+  else
+    if [ $version -eq 32 ];then
+      echo "all:" >> ${databasesYML}
+      echo "  doctrine:" >> ${databasesYML}
+      echo "    class: sfDoctrineDatabase" >> ${databasesYML}
+      echo "    param:" >> ${databasesYML}
+      echo "      dsn: $dsn" >> ${databasesYML}
+      echo "      username: root" >> ${databasesYML}
+    fi
+  fi
+  echo "      encoding: utf8" >> ${databasesYML}
+  echo "      attributes: { 164: true }" >> ${databasesYML}
+} #}}}
+createConfigFile(){ #{{{
+  local baseUrl=$1;
+  local confdir=${dir}'/config'
+  local openpneYML=${dir}'/config/OpenPNE.yml'
+  local projectConfigration=${dir}'/config/ProjectConfiguration.class.php'
+  printf 'Create config file...'
+  if [ -e ${openpneYML}'.sample' ];then
+    cp ${openpneYML}'.sample' ${openpneYML};
+    sed -i".bak" -e 's/example.com/'${baseUrl}'/g' ${openpneYML} && rm ${openpneYML}'.bak';
+  fi
+  if [ -e ${projectConfigration}'.sample' ];then cp ${projectConfigration}'.sample' ${projectConfigration};fi
+  echoError
+} #}}}
+confirm(){ #{{{
+  printf 'Do you install OpenPNE?(y/n):';
+  read ans;
+  if [[ "$ans" != "y" ]];then
+    echo 'aborted.';exit;
+  fi;
+} #}}}
+echoError(){ #{{{
+  if [ $? -eq 0 ];then
+    printf ${green}'Done.'${color_off}"\n"
+    else printf  ${red}'error'${color_off}"\n"
+  fi
+} #}}}
+install(){ #{{{
+  confirm
+  cloneOpenpne
+
+  local baseUrl=${prefix}${target_dir}${server_domain}
+  local openpne_db=$( echo ${baseUrl} | sed 's/\./_/g' | sed 's/-/_/g' )
+  local version=$( cat ${dir}/data/version.php | grep OPENPNE_VERSION | grep -oE '[0-9.]+' | grep -Eo '^3\.[0-9]' | sed -e 's/\.//g' )
+  local php_option=
+  local doctrine_build='doctrine:build --all --and-load --no-confirmation'
+  local dev_null=' > /dev/null'
+
+  # install
+  createConfigFile $baseUrl
+  clonePlugin
+  cd $dir
+  # refer http://d.hatena.ne.jp/kim_upsilon/20111125/1322232675
+  if [ $version -eq 32 ];then doctrine_build="doctrine:build-all-load";php_option="-d include_path=''";fi
+  if [ $version -lt 38 ];then
+    printf "installing plugin...\n"
+    php $php_option symfony opPlugin:sync  | grep -v 'sfPearFrontendPlugin\|web data for plugin'
+    echoError
+  fi
+  printf 'permission...'
+  php symfony openpne:permission > /dev/null 2>&1
+  echoError
+  printf 'cache clear...'
+  php symfony cache:clear > /dev/null 2>&1
+  echoError
+  printf 'databases.yml...'
+  createDatabasesYML $openpne_db $version
+  echoError
+  # for under op34{{{
+  if [ $version -lt 35 ];then
+    local IFS_BACKUP=$IFS
+    local IFS=$'\n'
+    local schema=${dir}'/plugins/opOpenSocialPlugin/config/doctrine/schema.yml'
+    local height="$( cat ${schema} | grep height )"
+    local height_after="$( printf '%s' $height | sed -e 's/true/false/g' )"
+    sed -i".bak" -e "s/$height/$height_after/g" ${schema} && echo 'changed '${schema}'.'
+    IFS=$IFS_BACKUP
+  fi
+  # }}}
+  printf 'build...'
+  php $php_option symfony $doctrine_build > /dev/null
+  echoError
+  printf 'publish-assets...'
+  php symfony plugin:publish-assets > /dev/null 2>&1
+  echoError
+
+  sed -i".bak" -e 's/#RewriteBase/RewriteBase/g' ${dir}'/web/.htaccess' && rm ${dir}'/web/.htaccess.bak'
+  ln -s ${dir} ${publicdir}/${baseUrl}
+
+  printf ${green}'install completed.'${color_off}"\n"
+  printf "  path:     ${dir}\n"
+  printf "  url:      ${baseUrl}\n"
+  printf "  database: ${openpne_db}\n"
+  printf "  branch:   ${branch}\n"
+} #}}}

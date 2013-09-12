@@ -1,0 +1,28 @@
+#!/bin/sh
+#desc:[show installed OpenPNE]
+show(){ #{{{
+  getBranch(){ cd $1 && if [ -e ./.git ];then git branch | grep '\*' | sed -e 's/\* //g' && return 0;else return 1;fi }
+  local branch=
+  if [ $target_dir ];then
+    local baseUrl=$(getBaseUrl ${dir})
+    local dbname=$(getDatabaseName ${dir})
+    branch=$(getBranch ${dir})
+    echo 'name: '$target_dir
+    echo 'branch: '$branch
+    echo 'path: '$dir
+    echo 'base_url: '$baseUrl
+    echo 'dbname: '$dbname
+  else
+    echo 'installed OpenPNE:'
+    for i in $(ls $installdir)
+    do
+      dir=$(isDir $i)
+      branch=$(getBranch ${dir})
+      if [ -n $branch ];then
+        echo '  '$i':'
+        echo '    branch: '$branch
+      else continue;
+      fi
+    done
+  fi
+} #}}}

@@ -1,0 +1,180 @@
+#!/bin/bash
+# base parameter{{{
+basedir="$HOME/.openpne"
+conf_file="${basedir}/conf";
+libdir="${basedir}/lib"
+installdir="${basedir}/installed"
+repository="${basedir}/repository/OpenPNE3.git"
+command=
+target_dir=
+dir=
+option=
+branch=
+#color{{{
+black="\033[30m"  #黒
+red="\033[31m"  #赤
+green="\033[32m"  #緑
+yellow="\033[33m"  #黄
+blue="\033[34m"  #青
+purple="\033[35m"  #紫
+cyan="\033[36m"  #水
+color_off="\033[0m"
+#}}}
+source ${libdir}/common
+#}}}
+# functions{{{
+# readConf{{{
+readConf(){ cat ${conf_file} | sed '/^$/d' | grep -vE '^#'; }
+#}}}
+getCommand(){ #{{{
+  local cmds=(`/bin/ls ${libdir} | grep -v common`)
+
+  if [ $# -gt 0 ];then
+    for cmd in ${cmds[@]}
+    do
+      if [ $cmd = $1 ];then
+        echo $cmd;return 0;
+      fi
+    done
+
+    echo 'argument invalid.';return 1
+  else echo 'argument required.';return 2
+  fi
+} #}}}
+isDir(){ #{{{
+  local dir=${installdir}'/'$1
+
+  echo $dir
+  if [ ! -e $dir ];then
+    return 1 #ディレクトリが存在しない
+  else
+    if [ -d $dir ];then
+      return 0 #ディレクトリが存在する
+    else
+      return 2 #同名ファイルが存在する
+    fi
+  fi
+} #}}}
+setOption(){ #{{{
+  while getopts 'b:t:v' opt
+  do
+    case $opt in
+      b) option='branch';branch=$OPTARG;break;;
+      t) option='tag';branch=$OPTARG;break;;
+      v) option='debug';break;;
+      *) echo 'unknown option.';exit;;
+    esac
+  done
+} #}}}
+getOption(){ #{{{
+  local cmd=$1
+  local n=$(cat ${libdir}'/'${cmd} | egrep '\#option:' | wc -l)
+  #declare -a options=($(cat ${libdir}'/'${cmd} | grep -E '\#options:' | sed -e 's/#options\://g'))
+  echo ${options[@]}
+} #}}}
+configure(){ #{{{
+  if [ ! -e $conf_file ];then echo $conf_file' is not exist.';exit;fi
+
+  getValue(){ local pattern=$1;echo `readConf | grep -vE '^_' | grep -E "(${pattern})" | awk '{print $2}'`;}
+
+  local -a parameter=(`readConf | grep -vE '^_' | awk '{print $1}'`)
+
+  for i in ${parameter[@]}
+  do
+    eval $i=`getValue $i`;
+  done
+
+  if [ ! -z ${prefix} ];then
+    prefix=${prefix}'.'
+  fi
+  plugins=(`readConf | grep -E '^(_plugin)' | awk '{print $2}'`)
+} #}}}
+confCheck(){ #{{{
+  local require_parameter=("publicdir" "server_domain" "dbms" "dbuser" "dbhost");
+  for i in ${require_parameter[@]}
+  do
+    if [ ! `readConf | grep -E '^'$i | awk '{print $2}'` ];then echo 'please set '$i' to "'$conf_file'".';exit;fi
+  done
+
+  if [ ! -e $installdir -o ! -d $installdir ];then echo 'installdir: '$installdir' is not exist.';exit;fi
+  if [ ! -e $publicdir -o ! -d $publicdir ];then echo 'publicdir: '$publicdir' is not exist.';exit;fi
+
+  # optionが指定された場合
+  if [ ! $option = '' ];then
+    #branch 指定があるとき
+    if [ $option = 'branch' ];then
+      if [ -e $repository -a -d $repository ];then
+        cd $repository && branch=(`git branch | grep $branch`);
+        if [ -z $branch ];then echo 'branch is not exist.';exit;fi
+      fi
+    elif [ $option = 'tag' ];then
+      if [ -e $repository -a -d $repository ];then
+        cd $repository && branch=(`git tag | grep $branch`);
+        echo $branch
+        if [ -z $branch ];then echo 'tag is not exist.';exit;fi
+      fi
+    fi
+  fi
+} #}}}
+setup(){ #{{{
+  configure;
+  local ret=
+  ret=`getCommand $@`
+  if [ $? -ne 0 ];then echo $ret;exit;
+  else command=$ret
+  fi
+
+  shift
+
+  case $command in
+    install)
+      if [ $# -gt 0 ];then
+        target_dir=$1
+        dir=`isDir $1`;
+        if [ $? -eq 1 ];then shift && setOption $@; return 0
+        else echo $dir' is already exist.';exit;
+        fi
+      else
+        echo 'install: argument required(new directory name).';exit;
+      fi
+      return 0;;
+    uninstall|show)
+      if [ $# -gt 0 ];then
+        target_dir=$1
+        dir=`isDir $1`;
+        case $? in
+          0) return 0;;
+          1) echo $dir' is not exist.';exit;;
+          2) echo $dir' is not directory.';exit;;
+        esac
+      else if [ $command = 'uninstall' ];then
+          echo 'uninstall: argument required(directory name).';exit;
+        fi
+      fi
+      return 0;;
+    ?)
+      return 0;;
+  esac
+} #}}}
+execute(){ #{{{
+  source ${libdir}'/'${command}
+  case $command in
+    install)
+      install;
+      return 0;;
+    uninstall|show)
+      eval $command $target_dir;
+      return 0;;
+    config)
+      config $conf_file;
+      return 0;;
+    *)
+      shift && eval $command $@;
+      return 0;;
+  esac
+} #}}}
+#}}}
+setup $@
+confCheck
+execute $@
+# vim: set foldmethod=marker:

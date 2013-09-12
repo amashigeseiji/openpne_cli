@@ -1,0 +1,32 @@
+#!/bin/sh
+#desc:[uninstall OpenPNE]
+uninstall(){ #{{{
+  local target=$1;
+  local dir=${installdir}/${target}
+  local baseUrl=`getBaseUrl $dir`
+  local dbname=
+  local sql=
+
+  if [ ! -d ${dir} ];then echo ${dir}' not found.';exit;fi
+
+  printf 'Do you delete '$target'?(y/n):'
+  read ans;
+  if [ $ans = 'y' ];then
+    echo 'Uninstalling '$target'...'
+    dbname=`getDatabaseName ${dir}`
+    if [ -L ${publicdir}'/'${baseUrl} ];then
+      /bin/rm ${publicdir}'/'${baseUrl};
+      echo 'rm: deleted symbolic link '${baseUrl}'.'
+    fi
+    if [ -d ${dir} ];then
+      /bin/rm -rf ${dir};
+      echo 'rm: deleted '${dir}'.'
+    fi
+    if [ `mysql -u${dbuser} -e 'show databases;' | grep ${dbname}` ];then
+      sql="DROP DATABASE ${dbname};"
+      eval $mysql_command
+      echo 'mysql: '$dbname' deleted.'
+    fi
+  fi
+  echo 'Done.'
+} #}}}
