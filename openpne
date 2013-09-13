@@ -64,23 +64,6 @@ confCheck(){ #{{{
 
   if [ ! -e $installdir -o ! -d $installdir ];then echo 'installdir: '$installdir' is not exist.';exit;fi
   if [ ! -e $publicdir -o ! -d $publicdir ];then echo 'publicdir: '$publicdir' is not exist.';exit;fi
-
-  # optionが指定された場合
-  if [ ! $option = '' ];then
-    #branch 指定があるとき
-    if [ $option = 'branch' ];then
-      if [ -e $repository -a -d $repository ];then
-        cd $repository && branch=(`git branch | grep $branch`);
-        if [ -z $branch ];then echo 'branch is not exist.';exit;fi
-      fi
-    elif [ $option = 'tag' ];then
-      if [ -e $repository -a -d $repository ];then
-        cd $repository && branch=(`git tag | grep $branch`);
-        echo $branch
-        if [ -z $branch ];then echo 'tag is not exist.';exit;fi
-      fi
-    fi
-  fi
 } #}}}
 setup(){ #{{{
   configure;
