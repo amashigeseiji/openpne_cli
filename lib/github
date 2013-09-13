@@ -1,0 +1,13 @@
+github(){
+  local baseurl="https://api.github.com"
+  local target="repos"
+  local repository="openpne/OpenPNE3"
+  local filter='.'
+  local option=
+
+  getOptions $@
+  if [ $option ];then option='/'$option;fi
+  url=${baseurl}'/'${target}'/'${repository}${option}
+
+  curl -s $url | jq $filter
+}

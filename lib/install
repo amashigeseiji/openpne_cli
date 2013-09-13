@@ -1,4 +1,3 @@
-#!/bin/sh
 #desc:[install OpenPNE]
 cloneOpenpne(){ #{{{
   # repositoryをローカルのディレクトリに指定している場合

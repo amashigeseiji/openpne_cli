@@ -22,6 +22,9 @@ color_off="\033[0m"
 #}}}
 source ${libdir}/common
 #}}}
+#作成中
+#getOption uninstall
+#exit
 # functions{{{
 # readConf{{{
 readConf(){ cat ${conf_file} | sed '/^$/d' | grep -vE '^#'; }
@@ -35,10 +38,9 @@ getCommand(){ #{{{
         echo $cmd;return 0;
       fi
     done
-
-    echo $message;return 1
-  else echo $message;return 2
   fi
+
+  echo $message;return 1
 } #}}}
 isDir(){ #{{{
   local dir=${installdir}'/'$1
@@ -64,12 +66,6 @@ setOption(){ #{{{
       *) echo 'unknown option.';exit;;
     esac
   done
-} #}}}
-getOption(){ #{{{
-  local cmd=$1
-  local n=$(cat ${libdir}'/'${cmd} | egrep '\#option:' | wc -l)
-  #declare -a options=($(cat ${libdir}'/'${cmd} | grep -E '\#options:' | sed -e 's/#options\://g'))
-  echo ${options[@]}
 } #}}}
 configure(){ #{{{
   if [ ! -e $conf_file ];then echo $conf_file' is not exist.';exit;fi

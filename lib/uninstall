@@ -1,5 +1,6 @@
-#!/bin/sh
 #desc:[uninstall OpenPNE]
+#option:branch:branch
+#option:help
 uninstall(){ #{{{
   local target=$1;
   local dir=${installdir}/${target}

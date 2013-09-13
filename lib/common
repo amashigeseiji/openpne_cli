@@ -1,15 +1,28 @@
-#!/bin/sh
-getCommands(){
+# common functions
+getCommands(){ #{{{
   ls ${libdir} | grep -v common
-}
-getDatabaseName(){
+} #}}}
+getDatabaseName(){ #{{{
   local dir=$1
   cat ${dir}'/config/databases.yml' | grep dsn | grep -oE 'dbname=.*(;|\r\n|\n|\r)' | awk -F'=' '{print $2}' | sed -e 's/;//g';
-}
-getBaseUrl(){
+} #}}}
+getBaseUrl(){ #{{{
   local dir=$1
   cat ${dir}'/config/OpenPNE.yml' | grep -E '^(base_url)' | awk -F' ' '{print $2}' | sed -e  's/\"//g' | sed -e 's/http:\/\///g';
-}
-isOpenPNEDir(){
+} #}}}
+isOpenPNEDir(){ #{{{
   if [ `ls | grep -E '^(symfony)$'` ];then :;else echo 'this directory is not OpenPNE directory.';exit;fi
-}
+} #}}}
+getOptions(){ #{{{
+  # コマンドライン引数で '--name=value' の形で与えられている場合,nameにvalueをセットする
+  # グローバル変数にセットするので，名前空間の汚染には気をつけてね
+  local -a options=()
+  for i in $@;do if [[ $i =~ ^-- ]];then options=("${options[@]}" "$i");fi;done
+  if [ ${#options[@]} -gt 0 ];then
+    for i in ${options[@]}
+    do
+      i=$(echo $i | sed -e 's/^--//g')
+      eval $i
+    done
+  fi
+} #}}}

@@ -1,3 +1,2 @@
-#!/bin/sh
 #desc:[edit config]
 config(){ vim $1; }

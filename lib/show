@@ -1,4 +1,3 @@
-#!/bin/sh
 #desc:[show installed OpenPNE]
 show(){ #{{{
   getBranch(){ cd $1 && if [ -e ./.git ];then git branch | grep '\*' | sed -e 's/\* //g' && return 0;else return 1;fi }
@@ -8,11 +7,11 @@ show(){ #{{{
     local baseUrl=$(getBaseUrl ${dir})
     local dbname=$(getDatabaseName ${dir})
     branch=$(getBranch ${dir})
-    printf "${green}name${color_off}:     $target_dir\n"
-    printf "${green}branch${color_off}:   $branch\n"
-    printf "${green}path${color_off}:     $dir\n"
-    printf "${green}base_url${color_off}: $baseUrl\n"
-    printf "${green}dbname${color_off}:   $dbname\n"
+    printf "  %b" "${green}name${color_off}:     $target_dir\n"
+    printf "  %b" "${green}branch${color_off}:   $branch\n"
+    printf "  %b" "${green}path${color_off}:     $dir\n"
+    printf "  %b" "${green}base_url${color_off}: $baseUrl\n"
+    printf "  %b" "${green}dbname${color_off}:   $dbname\n"
   else
     printf "${yellow}installed OpenPNE${color_off}\n"
     local -a installed_openpne=()
@@ -28,9 +27,9 @@ show(){ #{{{
       version=$(getVersion ${dir})
       branch=$(getBranch ${dir})
       if [ -n $branch ];then
-        printf "  ${green}$i${color_off}:\n"
-        echo '    version: '$version
-        echo '    branch: '$branch
+        printf '  %b\n' "${green}${i}${color_off}"
+        printf "    version: $version\n"
+        printf "    branch: $branch\n"
       else continue;
       fi
     done

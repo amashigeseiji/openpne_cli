@@ -1,0 +1,6 @@
+db(){
+  echo $1
+}
+execute(){
+  printf '%s\n' $@
+}
