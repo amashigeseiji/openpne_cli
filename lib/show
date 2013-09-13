@@ -1,11 +1,10 @@
 #desc:[show installed OpenPNE]
 show(){ #{{{
   getBranch(){ cd $1 && if [ -e ./.git ];then git branch | grep '\*' | sed -e 's/\* //g' && return 0;else return 1;fi }
-  getVersion(){ tail ${dir}'/data/version.php' | grep OPENPNE_VERSION | grep -Eo '3\.[0-9]'; }
   local branch=
   if [ $target_dir ];then
-    local baseUrl=$(getBaseUrl ${dir})
-    local dbname=$(getDatabaseName ${dir})
+    local baseUrl=$(_getBaseUrl ${dir})
+    local dbname=$(_getDatabaseName ${dir})
     branch=$(getBranch ${dir})
     printf "  %b" "${green}name${color_off}:     $target_dir\n"
     printf "  %b" "${green}branch${color_off}:   $branch\n"
@@ -23,8 +22,8 @@ show(){ #{{{
     done
     for i in ${installed_openpne[@]}
     do
-      dir=$(isDir $i)
-      version=$(getVersion ${dir})
+      dir=$(_isDir $i)
+      version=$(_getVersion ${dir})
       branch=$(getBranch ${dir})
       if [ -n $branch ];then
         printf '  %b\n' "${green}${i}${color_off}"

@@ -1,3 +1,4 @@
+#desc:[github api]
 github(){
   local baseurl="https://api.github.com"
   local target="repos"
@@ -5,7 +6,7 @@ github(){
   local filter='.'
   local option=
 
-  getOptions $@
+  _getOptions $@
   if [ $option ];then option='/'$option;fi
   url=${baseurl}'/'${target}'/'${repository}${option}
 

@@ -1,4 +1,15 @@
 #desc:[install OpenPNE]
+setOption(){ #{{{
+  while getopts 'b:t:v' opt
+  do
+    case $opt in
+      b) option='branch';branch=$OPTARG;break;;
+      t) option='tag';branch=$OPTARG;break;;
+      v) option='debug';break;;
+      *) echo 'unknown option.';exit;;
+    esac
+  done
+} #}}}
 cloneOpenpne(){ #{{{
   # repositoryをローカルのディレクトリに指定している場合
   if [[ ! ${repository} =~ ^http ]];then
@@ -97,14 +108,14 @@ echoError(){ #{{{
 } #}}}
 install(){ #{{{
   confirm
+  shift && setOption $@
   cloneOpenpne
 
   local baseUrl=${prefix}${target_dir}${server_domain}
   local openpne_db=$( echo ${baseUrl} | sed 's/\./_/g' | sed 's/-/_/g' )
-  local version=$( cat ${dir}/data/version.php | grep OPENPNE_VERSION | grep -oE '[0-9.]+' | grep -Eo '^3\.[0-9]' | sed -e 's/\.//g' )
+  local version=$( _getVersion | sed -e 's/\.//g' )
   local php_option=
   local doctrine_build='doctrine:build --all --and-load --no-confirmation'
-  local dev_null=' > /dev/null'
 
   # install
   createConfigFile $baseUrl

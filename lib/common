@@ -1,19 +1,34 @@
 # common functions
-getCommands(){ #{{{
+# common function name require '_' as prefix
+_isDir(){ #{{{
+  local dir=${installdir}'/'$1
+
+  echo $dir
+  if [ ! -e $dir ];then
+    return 1 #ディレクトリが存在しない
+  else
+    if [ -d $dir ];then
+      return 0 #ディレクトリが存在する
+    else
+      return 2 #同名ファイルが存在する
+    fi
+  fi
+} #}}}
+_getCommands(){ #{{{
   ls ${libdir} | grep -v common
 } #}}}
-getDatabaseName(){ #{{{
+_getDatabaseName(){ #{{{
   local dir=$1
   cat ${dir}'/config/databases.yml' | grep dsn | grep -oE 'dbname=.*(;|\r\n|\n|\r)' | awk -F'=' '{print $2}' | sed -e 's/;//g';
 } #}}}
-getBaseUrl(){ #{{{
+_getBaseUrl(){ #{{{
   local dir=$1
   cat ${dir}'/config/OpenPNE.yml' | grep -E '^(base_url)' | awk -F' ' '{print $2}' | sed -e  's/\"//g' | sed -e 's/http:\/\///g';
 } #}}}
-isOpenPNEDir(){ #{{{
+_isOpenPNEDir(){ #{{{
   if [ `ls | grep -E '^(symfony)$'` ];then :;else echo 'this directory is not OpenPNE directory.';exit;fi
 } #}}}
-getOptions(){ #{{{
+_getOptions(){ #{{{
   # コマンドライン引数で '--name=value' の形で与えられている場合,nameにvalueをセットする
   # グローバル変数にセットするので，名前空間の汚染には気をつけてね
   local -a options=()
@@ -25,4 +40,7 @@ getOptions(){ #{{{
       eval $i
     done
   fi
+} #}}}
+_getVersion(){ #{{{
+ tail ${dir}'/data/version.php' | grep OPENPNE_VERSION | grep -Eo '3\.[0-9]'
 } #}}}

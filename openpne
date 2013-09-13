@@ -22,17 +22,13 @@ color_off="\033[0m"
 #}}}
 source ${libdir}/common
 #}}}
-#作成中
-#getOption uninstall
-#exit
 # functions{{{
 # readConf{{{
 readConf(){ cat ${conf_file} | sed '/^$/d' | grep -vE '^#'; }
 #}}}
 getCommand(){ #{{{
-  local message='command not found.'
   if [ $# -gt 0 ];then
-    for cmd in $( getCommands )
+    for cmd in $( _getCommands )
     do
       if [ $cmd = $1 ];then
         echo $cmd;return 0;
@@ -40,32 +36,7 @@ getCommand(){ #{{{
     done
   fi
 
-  echo $message;return 1
-} #}}}
-isDir(){ #{{{
-  local dir=${installdir}'/'$1
-
-  echo $dir
-  if [ ! -e $dir ];then
-    return 1 #ディレクトリが存在しない
-  else
-    if [ -d $dir ];then
-      return 0 #ディレクトリが存在する
-    else
-      return 2 #同名ファイルが存在する
-    fi
-  fi
-} #}}}
-setOption(){ #{{{
-  while getopts 'b:t:v' opt
-  do
-    case $opt in
-      b) option='branch';branch=$OPTARG;break;;
-      t) option='tag';branch=$OPTARG;break;;
-      v) option='debug';break;;
-      *) echo 'unknown option.';exit;;
-    esac
-  done
+  echo 'command not found.';return 1
 } #}}}
 configure(){ #{{{
   if [ ! -e $conf_file ];then echo $conf_file' is not exist.';exit;fi
@@ -125,8 +96,8 @@ setup(){ #{{{
     install)
       if [ $# -gt 0 ];then
         target_dir=$1
-        dir=`isDir $1`;
-        if [ $? -eq 1 ];then shift && setOption $@; return 0
+        dir=`_isDir $1`;
+        if [ $? -eq 1 ];then return 0
         else echo $dir' is already exist.';exit;
         fi
       else
@@ -136,7 +107,7 @@ setup(){ #{{{
     uninstall|show)
       if [ $# -gt 0 ];then
         target_dir=$1
-        dir=`isDir $1`;
+        dir=`_isDir $1`;
         case $? in
           0) return 0;;
           1) echo $dir' is not exist.';exit;;
@@ -154,9 +125,6 @@ setup(){ #{{{
 execute(){ #{{{
   source ${libdir}'/'${command}
   case $command in
-    install)
-      install;
-      return 0;;
     uninstall|show)
       eval $command $target_dir;
       return 0;;
