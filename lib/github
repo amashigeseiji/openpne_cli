@@ -7,8 +7,28 @@ github(){
   local option=
 
   _getOptions $@
+  if [ $# -gt 0 ];then
+    case $1 in
+      help) help;exit;;
+    branch) branch;;
+       tag) tag;;
+    esac
+  fi
   if [ $option ];then option='/'$option;fi
   url=${baseurl}'/'${target}'/'${repository}${option}
 
-  curl -s $url | jq $filter
+  curl="curl -s $url | jq '$filter'"
+  eval $curl
+}
+help(){
+  printf '%b\n' "${yellow}usage${color_off}:"
+  printf '  %b\n' '"openpne github $option"'
+}
+branch(){
+  option='branches'
+  filter='.[].name'
+}
+tag(){
+  option='tags'
+  filter='.[].name'
 }

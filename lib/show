@@ -1,5 +1,16 @@
 #desc:[show installed OpenPNE]
+argCheck(){
+  target_dir=$1
+  dir=`_isDir $1`
+  case $? in
+    0) return 0;;
+    1) echo $dir' is not exist.';exit;;
+    2) echo $dir' is not directory.';exit;;
+  esac
+}
 show(){ #{{{
+  local target_dir dir
+  argCheck $1
   getBranch(){ cd $1 && if [ -e ./.git ];then git branch | grep '\*' | sed -e 's/\* //g' && return 0;else return 1;fi }
   local branch=
   if [ $target_dir ];then

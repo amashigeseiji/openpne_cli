@@ -1,2 +1,2 @@
 #desc:[edit config]
-config(){ vim $1; }
+config(){ vim $conf_file; }

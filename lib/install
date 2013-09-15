@@ -1,4 +1,12 @@
 #desc:[install OpenPNE]
+argCheck(){ #{{{
+  _argumentRequired $@
+  target_dir=$1
+  dir=`_isDir $1`;
+  if [ $? -eq 1 ];then :;
+  else echo $dir' is already exist.';exit;
+  fi
+} #}}}
 setOption(){ #{{{
   while getopts 'b:t:v' opt
   do
@@ -126,8 +134,10 @@ echoError(){ #{{{
   fi
 } #}}}
 install(){ #{{{
-  confirm
+  local target_dir dir option branch
+  argCheck $@
   shift && setOption $@
+  confirm
   cloneOpenpne
 
   local baseUrl=${prefix}${target_dir}${server_domain}
@@ -141,21 +151,21 @@ install(){ #{{{
   clonePlugin
   cd $dir
   # refer http://d.hatena.ne.jp/kim_upsilon/20111125/1322232675
-  if [ $version -eq 32 ];then doctrine_build="doctrine:build-all-load";php_option="-d include_path=''";fi
+  if [ $version -eq 32 ];then
+    doctrine_build="doctrine:build-all-load";
+    php_option="-d include_path=''";
+  fi
   if [ $version -lt 38 ];then
     printf "installing plugin...\n"
     php $php_option symfony opPlugin:sync  | grep -v 'sfPearFrontendPlugin\|web data for plugin'
     echoError
   fi
   printf 'permission...'
-  php symfony openpne:permission > /dev/null 2>&1
-  echoError
+  php symfony openpne:permission > /dev/null; echoError;
   printf 'cache clear...'
-  php symfony cache:clear > /dev/null 2>&1
-  echoError
+  php symfony cache:clear > /dev/null; echoError;
   printf 'databases.yml...'
-  createDatabasesYML $openpne_db $version
-  echoError
+  createDatabasesYML $openpne_db $version; echoError;
   # for under op34{{{
   if [ $version -lt 35 ];then
     local IFS_BACKUP=$IFS
@@ -168,11 +178,9 @@ install(){ #{{{
   fi
   # }}}
   printf 'build...'
-  php $php_option symfony $doctrine_build > /dev/null
-  echoError
+  php $php_option symfony $doctrine_build > /dev/null; echoError;
   printf 'publish-assets...'
-  php symfony plugin:publish-assets > /dev/null 2>&1
-  echoError
+  php symfony plugin:publish-assets > /dev/null; echoError;
 
   sed -i".bak" -e 's/#RewriteBase/RewriteBase/g' ${dir}'/web/.htaccess' && rm ${dir}'/web/.htaccess.bak'
   ln -s ${dir} ${publicdir}/${baseUrl}

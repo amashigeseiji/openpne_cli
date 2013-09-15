@@ -1,15 +1,11 @@
 #!/bin/bash
-# base parameter{{{
+# global parameter{{{
 basedir="$HOME/.openpne"
 conf_file="${basedir}/conf";
 libdir="${basedir}/lib"
 installdir="${basedir}/installed"
 repository="${basedir}/repository/OpenPNE3.git"
 command=
-target_dir=
-dir=
-option=
-branch=
 #color{{{
 black="\033[30m"  #黒
 red="\033[31m"  #赤
@@ -72,48 +68,11 @@ setup(){ #{{{
   if [ $? -ne 0 ];then echo $ret;exit;
   else command=$ret
   fi
-
-  shift
-
-  case $command in
-    install)
-      if [ $# -gt 0 ];then
-        target_dir=$1
-        dir=`_isDir $1`;
-        if [ $? -eq 1 ];then return 0
-        else echo $dir' is already exist.';exit;
-        fi
-      else
-        echo 'install: argument required(new directory name).';exit;
-      fi
-      return 0;;
-    uninstall|show)
-      if [ $# -gt 0 ];then
-        target_dir=$1
-        dir=`_isDir $1`;
-        case $? in
-          0) return 0;;
-          1) echo $dir' is not exist.';exit;;
-          2) echo $dir' is not directory.';exit;;
-        esac
-      else if [ $command = 'uninstall' ];then
-          echo 'uninstall: argument required(directory name).';exit;
-        fi
-      fi
-      return 0;;
-    ?)
-      return 0;;
-  esac
+  confCheck
 } #}}}
 execute(){ #{{{
   source ${libdir}'/'${command}
   case $command in
-    uninstall|show)
-      eval $command $target_dir;
-      return 0;;
-    config)
-      config $conf_file;
-      return 0;;
     *)
       shift && eval $command $@;
       return 0;;
@@ -121,6 +80,5 @@ execute(){ #{{{
 } #}}}
 #}}}
 setup $@
-confCheck
 execute $@
 # vim: set foldmethod=marker:

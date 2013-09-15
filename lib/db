@@ -1,3 +1,19 @@
+#desc:[operate mysql]
 db(){
-  echo $1
+  local mysql_cmd='mysql -u $dbuser $dbname -e "$sql"'
+  local sql=
+  local table=
+  local -a columns=()
+  local where=
+  local value=
+  columns='*'
+}
+sel(){
+  sql='select ${culomns} from ${table} ${where};';
+}
+where(){
+  where='where ${column}="${value}"'
+}
+update(){
+  update='update ${table} set ${column}=${value} ${where}'
 }

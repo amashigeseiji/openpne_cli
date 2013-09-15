@@ -1,19 +1,23 @@
 #desc:[uninstall OpenPNE]
-#option:branch:branch
-#option:help
+argCheck(){
+  _argumentRequired $1
+  target_dir=$1
+  dir=`_isDir $1`
+  case $? in
+    0) return 0;;
+    1) echo $dir' is not exist.';exit;;
+    2) echo $dir' is not directory.';exit;;
+  esac
+}
 uninstall(){ #{{{
-  local target=$1;
-  local dir=${installdir}/${target}
-  local baseUrl=`_getBaseUrl $dir`
-  local dbname=
-  local sql=
+  local target_dir dir baseUrl dbname sql
+  argCheck $1
+  baseUrl=`_getBaseUrl $dir`
 
-  if [ ! -d ${dir} ];then echo ${dir}' not found.';exit;fi
-
-  printf 'Do you delete '$target'?(y/n):'
+  printf 'Do you delete '$target_dir'?(y/n):'
   read ans;
   if [ $ans = 'y' ];then
-    echo 'Uninstalling '$target'...'
+    echo 'Uninstalling '$target_dir'...'
     dbname=`_getDatabaseName ${dir}`
     if [ -L ${publicdir}'/'${baseUrl} ];then
       /bin/rm ${publicdir}'/'${baseUrl};
