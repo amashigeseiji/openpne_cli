@@ -1,6 +1,6 @@
 #desc:[install OpenPNE]
 argCheck(){ #{{{
-  _argumentRequired $@
+  _argumentRequired '[new dir]' $1
   target_dir=$1
   dir=`_isDir $1`;
   if [ $? -eq 1 ];then :;

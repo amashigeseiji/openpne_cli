@@ -45,6 +45,7 @@ _getVersion(){ #{{{
  tail ${dir}'/data/version.php' | grep OPENPNE_VERSION | grep -Eo '3\.[0-9]'
 } #}}}
 _argumentRequired(){ #{{{
-  local message='echo ${command}: argument required.'
+  local option=$1 && shift
+  local message='echo ${command}: argument required ${option}'
   if [ $# -eq 0 ];then eval $message;exit 1; else return 0;fi
 } #}}}
