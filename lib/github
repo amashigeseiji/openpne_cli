@@ -5,6 +5,7 @@ github(){
   local repository="openpne/OpenPNE3"
   local filter='.'
   local option=
+  local url curl json
 
   _getOptions $@
   if [ $# -gt 0 ];then
@@ -12,23 +13,45 @@ github(){
       help) help;exit;;
     branch) branch;;
        tag) tag;;
+      gist) shift && gist $@;;
     esac
   fi
   if [ $option ];then option='/'$option;fi
+
   url=${baseurl}'/'${target}'/'${repository}${option}
 
-  curl="curl -s $url | jq '$filter'"
-  eval $curl
+  json=$(getJson $url) && isNotFound $json;
+  printf '%b\n' $json | jq "$filter"
 }
-help(){
+getJson(){ #{{{
+  local url=$1
+  local curl="curl -s $url"
+  eval $curl
+} #}}}
+help(){ #{{{
   printf '%b\n' "${yellow}usage${color_off}:"
   printf '  %b\n' '"openpne github $option"'
-}
-branch(){
+} #}}}
+branch(){ #{{{
   option='branches'
   filter='.[].name'
-}
-tag(){
+} #}}}
+tag(){ #{{{
   option='tags'
   filter='.[].name'
-}
+} #}}}
+gist(){ #{{{
+  _argumentRequired '[gist username]' $1
+  target='users'
+  repository=$1
+  option='gists'
+  if [ ! $2 ];then
+    filter='.[].files[].filename'
+  else
+    filter='.[].files[].filename | contains("'$2'")'
+  fi
+} #}}}
+isNotFound(){ #{{{
+  local mes=`echo $@ | grep 'Not Found'`;
+  if [ "$mes" ];then echo $mes | jq .message;exit;fi;
+} #}}}
