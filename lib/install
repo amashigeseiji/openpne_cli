@@ -14,7 +14,7 @@ setOption(){ #{{{
       b) option='branch';branch=$OPTARG;break;;
       t) option='tag';branch=$OPTARG;break;;
       v) option='debug';break;;
-      *) echo 'unknown option.';exit;;
+      *) echo 'invalid option.';exit;;
     esac
   done
   optCheck
