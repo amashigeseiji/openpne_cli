@@ -49,6 +49,7 @@ _openpne(){
   elif (( CURRENT > 2 ));then
     if [ -e $compdir'/_'${words[2]} ];then
       source $compdir'/_'${words[2]}
+    else _files
     fi
   fi
 

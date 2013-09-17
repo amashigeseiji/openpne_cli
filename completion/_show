@@ -1,0 +1,1 @@
+compadd -X '%Binstalled%b' -J'installed' $(ls $installdir)
