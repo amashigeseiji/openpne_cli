@@ -29,8 +29,22 @@ getJson(){ #{{{
   eval $curl
 } #}}}
 help(){ #{{{
-  printf '%b\n' "${yellow}usage${color_off}:"
-  printf '  %b\n' '"openpne github $option"'
+  printf '%b\n' ${yellow}'usage:'${color_off}
+  printf '  %b\n' 'openpne github [args]'
+  printf '%b\n'
+  printf '%b\n' ${yellow}'args:'${color_off}
+  printf '  %-10b' 'branch'
+  printf '  %b\n' 'show repository branches.'
+  printf '  %-10b' 'tag'
+  printf '  %b\n' 'show repository tags.'
+  printf '  %-10b' 'gist[repo]'
+  printf '  %b\n' 'show gists.'
+  printf '  %-10b' 'help'
+  printf '  %b\n' 'show this help.'
+  printf '\n'
+  printf '%s\n' 'if you want to see another repository information,'
+  printf '%s\n' 'you can assign repository like this:'
+  printf '    %s\n' '--repository="amashigeseiji/openpne_cli"'
 } #}}}
 branch(){ #{{{
   option='branches'
@@ -46,7 +60,7 @@ gist(){ #{{{
   repository=$1
   option='gists'
   if [ ! $2 ];then
-    filter='.[].files[].filename'
+    filter='.[] | .files[].filename, .description'
   else
     filter='.[].files[].filename | contains("'$2'")'
   fi
