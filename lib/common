@@ -46,6 +46,6 @@ _getVersion(){ #{{{
 } #}}}
 _argumentRequired(){ #{{{
   local option=$1 && shift
-  local message='echo ${command}: argument required ${option}'
+  local message='echo ${command}: argument required [${option}]'
   if [ $# -eq 0 ];then eval $message;exit 1; else return 0;fi
 } #}}}

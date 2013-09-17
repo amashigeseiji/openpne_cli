@@ -1,6 +1,6 @@
 #desc:[uninstall OpenPNE]
 argCheck(){
-  _argumentRequired '[dirname]' $1
+  _argumentRequired 'dirname' $1
   target_dir=$1
   dir=`_isDir $1`
   case $? in

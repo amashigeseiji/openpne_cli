@@ -55,7 +55,7 @@ tag(){ #{{{
   filter='.[].name'
 } #}}}
 gist(){ #{{{
-  _argumentRequired '[gist username]' $1
+  _argumentRequired 'gist username' $1
   target='users'
   repository=$1
   option='gists'

@@ -1,4 +1,4 @@
-#desc:[show help]
+#desc:[show this help]
 help(){
   usage
   local IFS_BACKUP=$IFS;local IFS=$'\n'
