@@ -1,26 +1,35 @@
 #desc:[show this help]
 help(){
-  usage
-  local IFS_BACKUP=$IFS;local IFS=$'\n'
-
-  __getDescription(){
+  local IFS_BACKUP IFS
+  __getDescription(){ #{{{
     desc="`cat ${basedir}'/lib/'$1 | grep -E '^(#desc:)' | grep -oE '\[.*\]'`"
     if [ ! $desc ];then desc='[no description]';fi
     printf $desc
-  }
-  __getValue(){
+  } #}}}
+  __getValue(){ #{{{
     for i in $@;do
-      printf '  %-14b' ${i};
+      printf '  %-14b--' ${i};
       printf '  %s\n'  `__getDescription $i` | sed -e 's/\[//g' | sed -e 's/\]$//g';
     done;
-  }
+  } #}}}
 
-  printf '%b\n' ${yellow}'command:'${color_off}
-  __getValue $(_getCommands)
-  IFS=$IFS_BACKUP
+  if [ ! $1 ];then globalHelp;
+  else
+    #TODO
+    for i in $(_getCommands);do
+      if [ $1 = $i ];then echo hoge;fi
+    done
+  fi
 }
-usage(){
+usage(){ #{{{
   printf '%b\n' ${yellow}'usage:'${color_off}
   printf '  %b\n' 'openpne <command> [args]'
   printf '\n'
+} #}}}
+globalHelp(){
+  IFS_BACKUP=$IFS && IFS=$'\n'
+  usage;
+  printf '%b\n' ${yellow}'command:'${color_off}
+  __getValue $(_getCommands)
+  IFS=$IFS_BACKUP
 }

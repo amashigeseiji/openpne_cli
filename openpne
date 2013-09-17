@@ -6,6 +6,7 @@ libdir="${basedir}/lib"
 installdir="${basedir}/installed"
 repository="${basedir}/repository/OpenPNE3.git"
 command=
+cmd_conf=
 #color{{{
 black="\033[30m"  #黒
 red="\033[31m"  #赤
@@ -68,6 +69,7 @@ setup(){ #{{{
   if [ $? -ne 0 ];then echo $ret;exit;
   else command=$ret
   fi
+  cmd_conf=${basedir}'/config/'${command}'.conf'
   confCheck
 } #}}}
 execute(){ #{{{

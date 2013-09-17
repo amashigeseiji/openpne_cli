@@ -1,0 +1,5 @@
+_arguments : \
+  '2:installed:_files -W $installdir' \
+  '-b[branch]:branch:compadd $(__getBranch)' \
+  '-t[tag]:tag:compadd $(__getBranch)' \
+  && return 0

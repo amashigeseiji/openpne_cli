@@ -1,0 +1,57 @@
+#compdef openpne op
+_openpne(){
+  local opt_args state context line
+  local basedir=$HOME'/.openpne'
+  local installdir=${basedir}'/installed'
+  local compdir=${basedir}'/completion'
+  local -a cmds; cmds=($( ls ${basedir}'/lib' | grep -v common ))
+  local IFS_BACKUP=$IFS
+  isntalldir=`cat ${basedir}'/conf' | grep -E '^(installdir)' | awk -F' ' '{print $2}'`
+  #functions{{{
+  __getDescription(){ #{{{
+    local desc="$( cat ${basedir}'/lib/'$1 | grep -E '^(#desc:)' | sed -e 's/\#desc\:\[//g' | sed -e 's/\]//g')"
+    if [ ! $desc ];then desc='no description';fi
+    printf $desc
+  } #}}}
+  __getValue(){ #{{{
+    local -a args
+    for i in ${cmds[@]}
+    do
+      args=(${args[@]} ${i}'\:'\"$( __getDescription $i )\")
+    done;
+    echo ${args[@]}
+  } #}}}
+  __getBranch(){ #{{{
+    local repository=`cat $basedir/conf | grep -E '^(repository)' | awk -F' ' '{print $2}' | sed -e "s/'//g"`
+    local branch=''
+    if [ `echo $repository | grep -E '^[$HOME|~]'` ];then
+      repository=$HOME`echo $repository | sed -e 's/$HOME//g' | sed -e 's/~//g'`
+    elif [[ $repository =~ ^(http|git) ]];then
+      return 1;
+    fi
+    if [ -e $repository -a -d $repository ];then
+      cd $repository && branch=(`git branch` `git tag`)
+      echo ${branch[@]} && return 0
+    fi
+    return 1
+  } #}}}
+  #}}}
+  if [ `echo $installdir | grep -E '^[$HOME|~]'` ];then
+    installdir=$HOME`echo $installdir | sed -e 's/$HOME//g' | sed -e 's/~//g'`
+  fi
+
+  if (( CURRENT == 2 ));then
+    local IFS=$'\n'
+    _arguments : \
+      "1:commands:(($(__getValue)))"
+    IFS=$IFS_BACKUP \
+    && return 0
+  elif (( CURRENT > 2 ));then
+    if [ -e $compdir'/_'${words[2]} ];then
+      source $compdir'/_'${words[2]}
+    fi
+  fi
+
+  IFS=$IFS_BACKUP
+  unfunction __getDescription __getValue __getBranch
+}
