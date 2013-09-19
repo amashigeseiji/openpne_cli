@@ -49,3 +49,9 @@ _argumentRequired(){ #{{{
   local message='echo ${command}: argument required [${option}]'
   if [ $# -eq 0 ];then eval $message;exit 1; else return 0;fi
 } #}}}
+# if argument is number, then echo argument.
+_isNumber(){ #{{{
+  if [ $(echo $1 | egrep '^[0-9]+$') ];then
+    echo $1
+  fi
+} #}}}
