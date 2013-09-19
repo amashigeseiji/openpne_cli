@@ -7,7 +7,11 @@ github(){
   local option=
   local url curl json
 
-  _getOptions $@
+  _getOptions 'o:repository' 'o:option' 'o:filter' $@
+  echo $repository
+  echo $t
+  echo $filter
+  exit
   if [ $# -gt 0 ];then
     case $1 in
       help) help;exit;;

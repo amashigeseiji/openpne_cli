@@ -30,16 +30,27 @@ _isOpenPNEDir(){ #{{{
 } #}}}
 _getOptions(){ #{{{
   # コマンドライン引数で '--name=value' の形で与えられている場合,nameにvalueをセットする
-  # グローバル変数にセットするので，名前空間の汚染には気をつけてね
-  local -a options=()
-  for i in $@;do if [[ $i =~ ^-- ]];then options=("${options[@]}" "$i");fi;done
-  if [ ${#options[@]} -gt 0 ];then
-    for i in ${options[@]}
-    do
-      i=$(echo $i | sed -e 's/^--//g')
-      eval $i
-    done
-  fi
+  local -a require options
+  local i j
+  require=($(printf '%s\n' $@ | egrep '^[o:]' | sed -e 's/o://g'))
+  options=($(printf '%s\n' $@ | egrep '^--'))
+  evaluate='i=$(echo $i | sed -e "s/^--//g") && eval $i'
+  if [ ${#options[@]} -eq 0 ];then return;fi
+  case ${#require[@]} in
+    0)
+      for i in ${options[@]}
+      do
+        eval $evaluate
+      done;;
+    *)
+      for i in ${options[@]}
+      do
+        opt_name=$(echo $i | sed -e 's/^--//g' | awk -F'=' '{print $1}')
+        if [ $(printf '%s\n' ${require[@]} | egrep "^${opt_name}$") ];then
+          eval $evaluate
+        fi
+      done;;
+  esac
 } #}}}
 _getVersion(){ #{{{
  tail ${dir}'/data/version.php' | grep OPENPNE_VERSION | grep -Eo '3\.[0-9]'
