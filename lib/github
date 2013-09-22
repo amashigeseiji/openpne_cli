@@ -3,11 +3,11 @@ github(){ #{{{
   local baseurl="https://api.github.com"
   local target="repos"
   local repository="openpne/OpenPNE3"
-  local filter='.'
+  local filter=
   local option=
   local url curl json
 
-  _getOptions 'o:repository' 'o:option' 'o:filter' $@
+  _getOptions 'o:repository' 'o:option' 'o:filter' 'o:id' $@
   if [ $# -gt 0 ];then
     case $1 in
       help) help;exit;;
@@ -21,7 +21,11 @@ github(){ #{{{
   url=${baseurl}'/'${target}'/'${repository}${option}
 
   json=$(getJson $url) && isNotFound $json;
-  printf '%b\n' $json | jq "$filter"
+  if [ $filter ];then
+    echo $json | jq "$filter"
+  else
+    echo $json
+  fi
 } #}}}
 getJson(){ #{{{
   local url=$1
@@ -56,17 +60,28 @@ tag(){ #{{{
   filter='.[].name'
 } #}}}
 gist(){ #{{{
-  #_argumentRequired 'gist username' $1
   target='users'
-  #repository=$1
   option='gists'
-  if [ ! $2 ];then
-    filter='.[] | .files[].filename, .description'
-  else
-    filter='.[].files[].filename | contains("'$2'")'
+  url=${baseurl}'/'${target}'/'${repository}/gists
+
+  if [ $id ];then
+    url=${baseurl}'/gists/'${id}
+    filter='.files[].content'
   fi
+
+  json=$(getJson $url) && isNotFound $json;
+  if [ $filter ];then
+    local IFS_BACKUP=$IFS;local IFS=$'\n';
+    local -a contents
+    contents=($(echo $json | jq "$filter" | sed 's/^\"//g' | sed 's/\"$//g'))
+    printf '%b\n' $contents
+    IFS=$IFS_BACKUP
+  else
+    echo $json
+  fi
+  exit
 } #}}}
 isNotFound(){ #{{{
   local mes=`echo $@ | grep 'Not Found'`;
-  if [ "$mes" ];then echo $mes | jq .message;exit;fi;
+  if [ "$mes" ];then echo $mes | jq .message | sed 's/\"//g';exit;fi;
 } #}}}

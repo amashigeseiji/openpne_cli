@@ -1,6 +1,13 @@
+local IFS_BACKUP=$IFS;local IFS=$'\n';
+_getArguments(){
+  printf '%s\n' '2:subcommand:(("help\:show help" "branch\:get branches" "tag\:get tags" "gist\:get gist"))'
+  printf '%s\n' '--repository=-[set repository]::'
+  printf '%s\n' '--filter=-[filtering for jq command]::'
+  if [ $words[3] = 'gist' ];then
+    printf '%s\n' '--id=-[set gist id]::'
+  fi
+}
 _arguments : \
-  '2:subcommand:(("help\:show help" "branch\:get branches" "tag\:get tags" "gist\:get gist"))' \
-  '--repository=-[set repository]:option:' \
-  '--filter=-[filtering for jq command]:option:' \
-  && return 0
+  $(_getArguments) \
+  && IFS=$IFS_BACKUP && unfunction _getArguments && return 0
 return 1;
