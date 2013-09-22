@@ -33,7 +33,7 @@ _getOptions(){ #{{{
   local -a require options
   local i j
   require=($(printf '%s\n' $@ | egrep '^[o:]' | sed -e 's/o://g'))
-  options=($(printf '%s\n' $@ | egrep '^--'))
+  options=($(printf '%s\n' $@ | egrep '^--.*\=.*'))
   evaluate='i=$(echo $i | sed -e "s/^--//g") && eval $i'
   if [ ${#options[@]} -eq 0 ];then return;fi
   case ${#require[@]} in
