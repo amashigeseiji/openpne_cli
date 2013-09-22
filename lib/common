@@ -30,27 +30,35 @@ _isOpenPNEDir(){ #{{{
 } #}}}
 _getOptions(){ #{{{
   # コマンドライン引数で '--name=value' の形で与えられている場合,nameにvalueをセットする
+  local IFS_BACKUP=$IFS;local IFS=$'\n'
   local -a require options
-  local i j
+  local i j opt_name opt_val
   require=($(printf '%s\n' $@ | egrep '^[o:]' | sed -e 's/o://g'))
   options=($(printf '%s\n' $@ | egrep '^--.*\=.*'))
-  evaluate='i=$(echo $i | sed -e "s/^--//g") && eval $i'
+  getOptName(){ echo $1 | sed -e 's/^--//g' | awk -F'=' '{print $1}'; }
+  getOptVal(){ echo $1 | awk -F'=' '{print $2}'; }
+  evaluate='i=$(getOptName $i)=\"$(getOptVal $i)\" && eval $i'
   if [ ${#options[@]} -eq 0 ];then return;fi
   case ${#require[@]} in
     0)
       for i in ${options[@]}
       do
-        eval $evaluate
+        if [ $(getOptVal $i) ];then
+          eval $evaluate
+        fi
       done;;
     *)
       for i in ${options[@]}
       do
-        opt_name=$(echo $i | sed -e 's/^--//g' | awk -F'=' '{print $1}')
-        if [ $(printf '%s\n' ${require[@]} | egrep "^${opt_name}$") ];then
-          eval $evaluate
+        if [ $(getOptVal $i) ];then
+          opt_name=$(getOptName $i)
+          if [ $(printf '%s\n' ${require[@]} | egrep "^${opt_name}$") ];then
+            eval $evaluate
+          fi
         fi
       done;;
   esac
+  IFS=$IFS_BACKUP
 } #}}}
 _getVersion(){ #{{{
  tail ${dir}'/data/version.php' | grep OPENPNE_VERSION | grep -Eo '3\.[0-9]'
