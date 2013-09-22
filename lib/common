@@ -1,4 +1,3 @@
-# common functions
 # common function name require '_' as prefix
 _isDir(){ #{{{
   local dir=${installdir}'/'$1
@@ -28,8 +27,8 @@ _getBaseUrl(){ #{{{
 _isOpenPNEDir(){ #{{{
   if [ `ls | grep -E '^(symfony)$'` ];then :;else echo 'this directory is not OpenPNE directory.';exit;fi
 } #}}}
+# if command-line arguments are passed as '--name=value', this function set 'value' to 'name'.
 _getOptions(){ #{{{
-  # コマンドライン引数で '--name=value' の形で与えられている場合,nameにvalueをセットする
   local IFS_BACKUP=$IFS;local IFS=$'\n'
   local -a require options
   local i j opt_name opt_val
