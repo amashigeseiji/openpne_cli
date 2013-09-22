@@ -28,8 +28,9 @@ usage(){ #{{{
 } #}}}
 globalHelp(){
   IFS_BACKUP=$IFS && IFS=$'\n'
-  usage;
+  local a=$(__getValue $(_getCommands))
+  usage
   printf '%b\n' ${yellow}'command:'${color_off}
-  __getValue $(_getCommands)
+  printf '%b\n' ${a}
   IFS=$IFS_BACKUP
 }
