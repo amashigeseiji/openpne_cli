@@ -1,5 +1,5 @@
 #desc:[github api]
-github(){
+github(){ #{{{
   local baseurl="https://api.github.com"
   local target="repos"
   local repository="openpne/OpenPNE3"
@@ -8,10 +8,6 @@ github(){
   local url curl json
 
   _getOptions 'o:repository' 'o:option' 'o:filter' $@
-  echo $repository
-  echo $t
-  echo $filter
-  exit
   if [ $# -gt 0 ];then
     case $1 in
       help) help;exit;;
@@ -26,10 +22,10 @@ github(){
 
   json=$(getJson $url) && isNotFound $json;
   printf '%b\n' $json | jq "$filter"
-}
+} #}}}
 getJson(){ #{{{
   local url=$1
-  local curl="curl -s $url"
+  local curl="curl -s '$url'"
   eval $curl
 } #}}}
 help(){ #{{{
@@ -48,7 +44,8 @@ help(){ #{{{
   printf '\n'
   printf '%s\n' 'if you want to see another repository information,'
   printf '%s\n' 'you can assign repository like this:'
-  printf '    %s\n' '--repository="amashigeseiji/openpne_cli"'
+  printf '\n'
+  printf '    %s\n' '--repository="$user_name/$repository_name"'
 } #}}}
 branch(){ #{{{
   option='branches'
@@ -59,9 +56,9 @@ tag(){ #{{{
   filter='.[].name'
 } #}}}
 gist(){ #{{{
-  _argumentRequired 'gist username' $1
+  #_argumentRequired 'gist username' $1
   target='users'
-  repository=$1
+  #repository=$1
   option='gists'
   if [ ! $2 ];then
     filter='.[] | .files[].filename, .description'

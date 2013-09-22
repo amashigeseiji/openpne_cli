@@ -1,0 +1,6 @@
+_arguments : \
+  '2:subcommand:(("help\:show help" "branch\:get branches" "tag\:get tags" "gist\:get gist"))' \
+  '--repository=-[set repository]:option:' \
+  '--filter=-[filtering for jq command]:option:' \
+  && return 0
+return 1;
