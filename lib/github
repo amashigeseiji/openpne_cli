@@ -71,13 +71,17 @@ gist(){ #{{{
 
   json=$(getJson $url) && isNotFound $json;
   if [ $filter ];then
-    local IFS_BACKUP=$IFS;local IFS=$'\n';
-    local -a contents
-    contents=($(echo $json | jq "$filter" | sed 's/^\"//g' | sed 's/\"$//g'))
-    printf '%b\n' $contents
-    IFS=$IFS_BACKUP
+    if [ $id ];then
+      local IFS_BACKUP=$IFS;local IFS=$'\n';
+      local -a contents
+      contents=($(echo $json | jq "$filter" | sed 's/^\"//g' | sed 's/\"$//g'))
+      printf '%b\n' $contents
+      IFS=$IFS_BACKUP
+    else
+      printf '%b\n' $json | jq $filter
+    fi
   else
-    echo $json
+    printf '%b\n' $json
   fi
   exit
 } #}}}
