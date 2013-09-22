@@ -3,7 +3,7 @@ _getArguments(){
   printf '%s\n' '2:subcommand:(("help\:show help" "branch\:get branches" "tag\:get tags" "gist\:get gist"))'
   printf '%s\n' '--repository=-[set repository]::'
   printf '%s\n' '--filter=-[filtering for jq command]::'
-  if [ $words[3] = 'gist' ];then
+  if [ $words[3] -a $words[3] = 'gist' ];then
     printf '%s\n' '--id=-[set gist id]::'
   fi
 }
