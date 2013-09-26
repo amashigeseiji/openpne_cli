@@ -36,7 +36,7 @@ show(){ #{{{
       dir=$(_isDir $i)
       version=$(_getVersion ${dir})
       branch=$(getBranch ${dir})
-      if [ -n $branch ];then
+      if [ -n "$branch" ];then
         printf '  %b\n' "${green}${i}${color_off}"
         printf "    version: $version\n"
         printf "    branch: $branch\n"
