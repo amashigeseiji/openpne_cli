@@ -27,7 +27,8 @@ op_api() {
   local url='http://'$baseUrl'/api.php/'$targetAction'.json'
   local apiKey=$(getApiKeyByMemberId)
   local curl="curl $url -F apiKey='$apiKey' $(getParameter $@)"
-  printf ${yellow}'command: '${color_off}
+  printf ${yellow}'command: '${color_off}"\n"
   echo $curl
+  printf ${yellow}'response: '${color_off}"\n"
   eval $curl
 }
