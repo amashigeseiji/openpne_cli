@@ -1,0 +1,33 @@
+#desc:[local OpenPNE api]
+argCheck() {
+  _argumentRequired 'target sns' $1
+  _argumentRequired 'target api action' $2
+  _argumentRequired 'member_id' $3
+  dbname=$(~/.openpne/openpne show $1 | grep 'dbname' | awk '{print $2}');
+  baseUrl=$(~/.openpne/openpne show $1 | grep 'base_url' | awk '{print $2}');
+  targetAction=$2;
+  memberId=$3;
+}
+getApiKeyByMemberId() {
+  local sql="select value from member_config where member_id = $memberId and name = \"api_key\";";
+  local command="mysql -uroot $dbname -e '$sql'"
+  eval $command | grep -v 'value'
+}
+getParameter() {
+  local param=($(printf '%s\n' $@ | egrep '^--.*\=.*' | sed -e 's/^--//g'))
+  local str=''
+  for i in ${param[@]}
+  do
+    str="$str -F $i"
+  done
+  echo $str
+}
+op_api() {
+  argCheck $@
+  local url='http://'$baseUrl'/api.php/'$targetAction'.json'
+  local apiKey=$(getApiKeyByMemberId)
+  local curl="curl $url -F apiKey='$apiKey' $(getParameter $@)"
+  printf ${yellow}'command: '${color_off}
+  echo $curl
+  eval $curl
+}
