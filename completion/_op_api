@@ -1,0 +1,5 @@
+if (( CURRENT == 3 ));then
+  compadd -X'%Binstalled%b' -J'installed' $(ls $installdir)
+elif (( CURRENT == 4 ));then
+  compadd -X'%Baction%b' -J'action' $(php $installdir'/'${words[3]}/symfony app:routes api | grep -v 'default' | awk -F'\ /' '{print $2}')
+fi
