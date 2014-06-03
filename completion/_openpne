@@ -4,7 +4,7 @@ _openpne(){
   local basedir=$HOME'/.openpne'
   local installdir=${basedir}'/installed'
   local compdir=${basedir}'/completion'
-  local -a cmds; cmds=($( ls ${basedir}'/lib' | grep -v common ))
+  local -a cmds; cmds=($( ls ${basedir}'/lib' | egrep -v '(common|skelton\.cmd)' ))
   local IFS_BACKUP=$IFS
   isntalldir=`cat ${basedir}'/conf' | grep -E '^(installdir)' | awk -F' ' '{print $2}'`
   #functions{{{

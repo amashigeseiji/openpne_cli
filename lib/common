@@ -14,7 +14,7 @@ _isDir(){ #{{{
   fi
 } #}}}
 _getCommands(){ #{{{
-  ls ${libdir} | grep -v common
+  ls ${libdir} | egrep -v '(common|skelton\.cmd)'
 } #}}}
 _getDatabaseName(){ #{{{
   local dir=$1
