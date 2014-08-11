@@ -52,7 +52,7 @@ cloneOpenpne(){ #{{{
       echoError
     fi
   fi
-  printf "Cloning into '${dir}'..."
+  printf "Install directory: '${yellow}${dir}${color_off}'\n"
   git clone ${repository} ${dir} > /dev/null;echoError;
 
   # branchが指定されたら切り替える
@@ -71,8 +71,8 @@ clonePlugin(){ #{{{
     local repository=''
     local plugin_ver=$( readConf | grep -E '^_plugin' | grep $i | awk -F' ' '{print $3}' )
     local plugin_name=$( readConf | grep -E '^_plugin' | grep $i | awk '{print $2}' | awk -F'[/:]' '{print $NF}' | sed -e 's/.git//g' )
-    echo 'install plugin: '$plugin_name
-    echo 'plugin_version: '$plugin_ver
+    printf 'Install plugin: '${yellow}${plugin_name}${color_off}"\n"
+    printf 'plugin_version: '${yellow}${plugin_ver}${color_off}"\n"
 
     if [[ $i =~ ^(http|git) ]];then repository=$i;
     else
