@@ -24,11 +24,11 @@ getParameter() {
 }
 op_api() {
   argCheck $@
-  local url='http://'$baseUrl'/api.php/'$targetAction'.json'
+  local url='http://'$baseUrl'/api.php/'$targetAction
   local apiKey=$(getApiKeyByMemberId)
   local curl="curl $url -F apiKey='$apiKey' $(getParameter $@)"
   printf ${yellow}'command: '${color_off}"\n"
   echo $curl
   printf ${yellow}'response: '${color_off}"\n"
-  eval $curl
+  eval $curl | jq .
 }

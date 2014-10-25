@@ -183,7 +183,7 @@ install(){ #{{{
   php symfony plugin:publish-assets > /dev/null; echoError;
 
   sed -i".bak" -e 's/#RewriteBase/RewriteBase/g' ${dir}'/web/.htaccess' && rm ${dir}'/web/.htaccess.bak'
-  ln -s ${dir} ${publicdir}/${baseUrl}
+  ln -s ${dir}/web ${publicdir}/${baseUrl}
 
   printf ${green}'install completed.'${color_off}"\n"
   printf "  path:     ${dir}\n"
